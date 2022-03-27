@@ -1,24 +1,34 @@
 import React, { useState, useEffect } from 'react'
+import Select from 'react-select'
 
 const Weather = () => {
 
   const [ api, setApi ] = useState([])
-  const [place, setPlace] = useState('Lima')
+  const options = [
+    { value: 'Lima', label: 'Lima' },
+    { value: 'London', label: 'London' }
+  ]
+
+  const getApi = async (city) => {
+    const apiKey = 'b39b7307d80f48a181d143510211606'
+    try {
+      const response = await fetch(`https://api.weatherapi.com/v1/current.json?key=${ apiKey }&q=${ city }&aqi=no`)
+      const data = await response.json()
+      setApi(data)
+      console.log(data);
+    } catch (error) {
+      console.log(error)
+    }
+  }
 
   useEffect(() => {
-    const getApi = async () => {
-      const apiKey = 'b39b7307d80f48a181d143510211606'
-      try {
-        const response = await fetch(`https://api.weatherapi.com/v1/current.json?key=${ apiKey }&q=${place}&aqi=no`)
-        const data = await response.json()
-        console.log(data)
-        setApi(data)
-      } catch (error) {
-        console.log(error)
-      }
-    }
-    getApi()
+    getApi('Lima')
   },[])
+
+  const handleTypeSelect = (e) => {
+    getApi(e.value)
+  }
+
 
   const localDate = api.localtime
 
@@ -35,8 +45,13 @@ const Weather = () => {
 
   return (
     <div className="weather-container">
+      <Select
+        options={options}
+        onChange={handleTypeSelect}
+      />
       <div className="weather">
-        <p className="date">{ (new Date()).toUTCString('es-MX', localDate)}</p>
+        <h1 className="name">{ api.location.name }</h1>
+        <p className="date">{ (new Date()).toUTCString('es-MX', localDate) }</p>
         <div className="temperature-container">
           <img src={ condition.icon } alt={condition.text} />
           <div className="temperature">
